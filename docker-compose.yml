@@ -1,0 +1,43 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-bdc}
+      MYSQL_USER: ${MYSQL_USER:-bdc}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-bdc_local_demo}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-local_demo_root}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  backend:
+    build: ./backend
+    environment:
+      SERVER_ADDRESS: 0.0.0.0
+      DEMO_MODE: ${DEMO_MODE:-true}
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      BUSINESS_DATA_PROVIDER: ${BUSINESS_DATA_PROVIDER:-mock}
+      WEB_SEARCH_PROVIDER: ${WEB_SEARCH_PROVIDER:-wikipedia}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
+      SAP_BDC_BASE_URL: ${SAP_BDC_BASE_URL:-}
+      SAP_BDC_CLIENT_ID: ${SAP_BDC_CLIENT_ID:-}
+      SAP_BDC_CLIENT_SECRET: ${SAP_BDC_CLIENT_SECRET:-}
+      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-bdc}
+      DB_USER: ${MYSQL_USER:-bdc}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-bdc_local_demo}
+    depends_on:
+      mysql:
+        condition: service_healthy
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:3000:80"
+    depends_on:
+      - backend
+volumes:
+  mysql_data:

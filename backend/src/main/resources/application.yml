@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:h2:file:./data/bdc;MODE=MySQL}
+    username: ${DB_USER:sa}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  port: 8080
+  error:
+    include-message: always
+bdc:
+  demo: ${DEMO_MODE:true}
+  ai: ${AI_PROVIDER:mock}
+  provider: ${BUSINESS_DATA_PROVIDER:mock}

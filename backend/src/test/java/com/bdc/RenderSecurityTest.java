@@ -16,6 +16,7 @@ class RenderSecurityTest {
  @Autowired MockMvc mvc;
  @Test void healthPublicButPrivateDataProtected()throws Exception{
   mvc.perform(get("/api/health")).andExpect(status().isOk());
+  mvc.perform(get("/login")).andExpect(status().isOk());
   mvc.perform(get("/api/audit")).andExpect(status().isUnauthorized());
   mvc.perform(get("/api/conversations")).andExpect(status().isUnauthorized());
   mvc.perform(get("/")).andExpect(status().is3xxRedirection());

@@ -26,7 +26,7 @@ public class RenderSecurityConfig {
   var entryPoint=new org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint(entryPoints);
   entryPoint.setDefaultEntryPoint(new org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint("/login"));
   return http.authorizeHttpRequests(a->a.requestMatchers("/api/health","/error").permitAll().anyRequest().authenticated())
-   .formLogin(f->f.defaultSuccessUrl("/",true).permitAll())
+   .formLogin(f->f.loginPage("/login").defaultSuccessUrl("/",true).permitAll())
    .exceptionHandling(e->e.authenticationEntryPoint(entryPoint))
    .logout(l->l.logoutSuccessUrl("/login?logout")).build();
  }

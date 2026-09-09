@@ -10,25 +10,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.*;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.*;
-@SpringBootTest(properties={"DEMO_PASSWORD=render-test-only-password","spring.datasource.url=jdbc:h2:mem:renderTest;MODE=MySQL","spring.jpa.hibernate.ddl-auto=create-drop"})
+@SpringBootTest(properties={"spring.datasource.url=jdbc:h2:mem:renderTest;MODE=MySQL","spring.jpa.hibernate.ddl-auto=create-drop"})
 @ActiveProfiles("render") @AutoConfigureMockMvc
 class RenderSecurityTest {
  @Autowired MockMvc mvc;
- @Test void healthPublicButPrivateDataProtected()throws Exception{
+ @Test void demoIsPublic()throws Exception{
   mvc.perform(get("/api/health")).andExpect(status().isOk());
-  mvc.perform(get("/login")).andExpect(status().isOk());
-  mvc.perform(get("/api/audit")).andExpect(status().isUnauthorized());
-  mvc.perform(get("/api/conversations")).andExpect(status().isUnauthorized());
-  mvc.perform(get("/")).andExpect(status().is3xxRedirection());
+  mvc.perform(get("/login")).andExpect(redirectedUrl("/"));
+  mvc.perform(get("/api/audit")).andExpect(status().isOk());
+  mvc.perform(get("/api/conversations")).andExpect(status().isOk());
  }
- @Test void authenticatedChatRequiresCsrf()throws Exception{
+ @Test void anonymousChatRequiresCsrf()throws Exception{
   String body="{\"question\":\"Show revenue for the last 12 months.\"}";
-  mvc.perform(post("/api/chat").with(user("demo")).contentType("application/json").content(body)).andExpect(status().isForbidden());
-  mvc.perform(post("/api/chat").with(user("demo")).with(csrf()).contentType("application/json").content(body)).andExpect(status().isOk());
-  mvc.perform(get("/api/csrf").with(user("demo"))).andExpect(status().isOk()).andExpect(jsonPath("$.token").isNotEmpty());
- }
- @Test void configuredLoginWorks()throws Exception{
-  mvc.perform(formLogin().user("demo").password("render-test-only-password")).andExpect(authenticated().withUsername("demo"));
-  mvc.perform(formLogin().user("demo").password("wrong")).andExpect(unauthenticated());
+  mvc.perform(post("/api/chat").contentType("application/json").content(body)).andExpect(status().isForbidden());
+  mvc.perform(post("/api/chat").with(csrf()).contentType("application/json").content(body)).andExpect(status().isOk());
+  mvc.perform(get("/api/csrf")).andExpect(status().isOk()).andExpect(jsonPath("$.token").isNotEmpty());
  }
 }

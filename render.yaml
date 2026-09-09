@@ -17,7 +17,3 @@ services:
         value: mock
       - key: WEB_SEARCH_PROVIDER
         value: wikipedia
-      - key: DEMO_USERNAME
-        value: demo
-      - key: DEMO_PASSWORD
-        generateValue: true
